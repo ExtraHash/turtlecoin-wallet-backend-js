@@ -13,6 +13,11 @@ class Logger {
      */
     private callback?: (prettyMessage: string, message: string, level: LogLevel, categories: LogCategory[]) => any;
 
+    /**
+     * The last log line emitted
+     */
+    private lastLine: string = '';
+
     constructor(
         level?: LogLevel,
         callback?: (prettyMessage: string, message: string, level: LogLevel, categories: LogCategory[]) => any) {
@@ -50,11 +55,18 @@ class Logger {
 
         output += `: ${message}`;
 
+        // don't spam the console with duplicate messages
+        if (this.getLastLine() === output) {
+            return;
+        }
+
         if (level >= this.logLevel) {
             /* If the user provides a callback, log to that instead */
             if (this.callback) {
+                this.setLastLine(output);
                 this.callback(output, message, level, categories);
             } else {
+                this.setLastLine(output);
                 console.log(output);
             }
         }
@@ -94,6 +106,14 @@ class Logger {
                    categories: LogCategory[]) => any) {
 
         this.callback = callback;
+    }
+
+    private setLastLine(line: string): void {
+        this.lastLine = line;
+    }
+
+    private getLastLine(): string {
+        return this.lastLine;
     }
 }
 
